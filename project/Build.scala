@@ -9,7 +9,7 @@ object Build extends sbt.Build {
     "akka-cluster-example-inloop",
     file("."),
     settings = commonSettings ++ Seq(
-      libraryDependencies ++= Dependencies.all))
+      libraryDependencies ++= Dependencies.all)).settings(XitrumPackage.copy("bin", "conf", "logs"): _*)
 
   def commonSettings = Defaults.defaultSettings ++
     formatSettings ++
@@ -53,12 +53,13 @@ object Dependencies {
 
   val akka_actor = "com.typesafe.akka" %% "akka-actor" % AKKA_VERSION 
   val akka_cluster = "com.typesafe.akka" %% "akka-cluster" % AKKA_VERSION
+  val akka_contrib = "com.typesafe.akka" %% "akka-contrib" % AKKA_VERSION
   val spray_io = "io.spray" % "spray-io" % SPRAY_VERSION 
 
   val akka_testkit = "com.typesafe.akka" %% "akka-testkit" % AKKA_VERSION % "test"
   val scalatest = "org.scalatest" %% "scalatest" % "2.1.3" % "test"
   val specs2 = "org.specs2" %% "specs2" % "2.3.11" % "test"
 
-  val all = Seq(akka_actor, akka_cluster, spray_io, scalatest, akka_testkit, specs2)
+  val all = Seq(akka_actor, akka_cluster, akka_contrib, spray_io, scalatest, akka_testkit, specs2)
 
 }
