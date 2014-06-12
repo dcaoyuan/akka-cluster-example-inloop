@@ -59,7 +59,10 @@ object Dependencies {
   val akka_testkit = "com.typesafe.akka" %% "akka-testkit" % AKKA_VERSION % "test"
   val scalatest = "org.scalatest" %% "scalatest" % "2.1.3" % "test"
   val specs2 = "org.specs2" %% "specs2" % "2.3.11" % "test"
+  
+  val akka_slf4j = "com.typesafe.akka" %% "akka-slf4j" % AKKA_VERSION % "runtime"
+  val logback_classic = "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime"
 
-  val all = Seq(akka_actor, akka_cluster, akka_contrib, spray_io, scalatest, akka_testkit, specs2)
+  val all = Seq(akka_actor, akka_cluster, akka_contrib, spray_io, scalatest, akka_testkit, specs2, akka_slf4j, logback_classic)
 
 }

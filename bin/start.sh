@@ -32,13 +32,14 @@ esac
 inloop_id_pgm=${cluster_module}
 inloop_lock_file=.lock_${cluster_module}
 inloop_conf=../conf/${cluster_module}.conf
-logback_conf=../conf/logback.xml
+logback_conf=../conf/logback_${cluster_module}.xml
 
 export JAVA=${JAVA_HOME}/bin/java
 export FLAGS="-server -Dfile.encoding=UTF8 -XX:+UseNUMA -XX:+UseCondCardMark -XX:-UseBiasedLocking"
 export HEAP="-Xms256M -Xmx10240M -Xss1M"
 export GC="-XX:+UseParallelGC"
 
+NOW=$(date +"%Y-%m-%dT%H%M%S")
 
 cp="";
 for f in ../lib/*.jar;
@@ -47,7 +48,7 @@ done;
 cp=${dir_conf}":"${cp};
 
 
-$JAVA $FLAGS $HEAP $GC -Dconfig.file=${inloop_conf} -Dlogback.configurationFile=${logback_conf} ${akka_args} -cp ${cp} ${inloop_class_pgm} > ../logs/${cluster_module}_rt.log &
+$JAVA $FLAGS $HEAP $GC -Dconfig.file=${inloop_conf} -Dlogback.configurationFile=${logback_conf} ${akka_args} -cp ${cp} ${inloop_class_pgm} > ../logs/${cluster_module}_${NOW}_rt.log &
 inloop_pid=$!
 echo $inloop_pid > ./${inloop_lock_file}
 echo "Started ${inloop_id_pgm}, pid is $inloop_pid"
