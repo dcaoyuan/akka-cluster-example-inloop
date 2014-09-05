@@ -13,22 +13,25 @@ import scala.util.Success
 class CounterQuery extends Actor with ActorLogging {
 
   implicit val ec = context.dispatcher
+  
   lazy val counter1Region = {
     ClusterSharding(context.system).start(
-      typeName = "Counter1",
+      typeName = Counter1.shardName,
       entryProps = None,
       idExtractor = Counter1.idExtractor,
       shardResolver = Counter1.shardResolver)
-    ClusterSharding(context.system).shardRegion("Counter1")
+    
+    ClusterSharding(context.system).shardRegion(Counter1.shardName)
   }
 
   lazy val counter2Region = {
     ClusterSharding(context.system).start(
-      typeName = "Counter2",
+      typeName = Counter2.shardName,
       entryProps = None,
       idExtractor = Counter2.idExtractor,
       shardResolver = Counter2.shardResolver)
-    ClusterSharding(context.system).shardRegion("Counter2")
+    
+    ClusterSharding(context.system).shardRegion(Counter2.shardName)
   }
 
   val tickTask = context.system.scheduler.schedule(3.seconds, 3.seconds, self, CounterQuery.Tick)
@@ -39,10 +42,8 @@ class CounterQuery extends Actor with ActorLogging {
       check(counter2Region)
     case CounterQuery.AskShard(shardName) =>
       shardName match {
-        case "Counter1" =>
-          check(counter1Region)
-        case "Counter2" =>
-          check(counter2Region)
+        case Counter1.shardName => check(counter1Region)
+        case Counter2.shardName => check(counter2Region)
       }
   }
 
@@ -66,7 +67,7 @@ object CounterQuery {
   def main(args: Array[String]) {
     //val cluster = Cluster(system)
     val query = system.actorOf(Props[CounterQuery])
-    query ! CounterQuery.AskShard("Counter1")
-    query ! CounterQuery.AskShard("Counter2")
+    query ! CounterQuery.AskShard(Counter1.shardName)
+    query ! CounterQuery.AskShard(Counter2.shardName)
   }
 }

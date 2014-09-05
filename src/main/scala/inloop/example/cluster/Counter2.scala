@@ -36,6 +36,8 @@ class Counter2 extends EventsourcedProcessor with ActorLogging {
 }
 
 object Counter2 {
+  val shardName = "Counter2"
+
   val idExtractor: ShardRegion.IdExtractor = {
     case EntryEnvelope(id, payload) => (id.toString, payload)
     case msg @ Get(id)              => (id.toString, msg)
@@ -49,7 +51,7 @@ object Counter2 {
   def startSharding = {
     val system = ClusterMonitor.system
     ClusterSharding(system).start(
-      typeName = "Counter2",
+      typeName = shardName,
       entryProps = Some(Props[Counter2]),
       idExtractor = idExtractor,
       shardResolver = shardResolver)
@@ -58,12 +60,12 @@ object Counter2 {
   lazy val region1 = {
     val system = ClusterMonitor.system
     ClusterSharding(system).start(
-      typeName = "Counter1",
+      typeName = Counter1.shardName,
       entryProps = None,
       idExtractor = Counter1.idExtractor,
       shardResolver = Counter1.shardResolver)
 
-    ClusterSharding(system).shardRegion("Counter1")
+    ClusterSharding(system).shardRegion(Counter1.shardName)
   }
 
   def main(args: Array[String]) {
