@@ -24,8 +24,8 @@ case $arg in
     seed1*)  cluster_module="seed1"; akka_args=""; inloop_class_pgm="inloop.example.cluster.ClusterMonitor";;
     seed2*)  cluster_module="seed2"; akka_args=""; inloop_class_pgm="inloop.example.cluster.ClusterMonitor";;
     query*)  cluster_module="query"; akka_args=""; inloop_class_pgm="inloop.example.cluster.CounterQuery";;
-    ctr1*)   cluster_module="counter1"; akka_args="" inloop_class_pgm="inloop.example.cluster.Counter1";;
-    ctr2*)   cluster_module="counter2"; akka_args=""; inloop_class_pgm="inloop.example.cluster.Counter2";;
+    stat1*)  cluster_module="counter1"; akka_args="" inloop_class_pgm="inloop.example.cluster.Counter1";;
+    stat2*)  cluster_module="counter2"; akka_args=""; inloop_class_pgm="inloop.example.cluster.Counter2";;
     *) usage
 esac
 
