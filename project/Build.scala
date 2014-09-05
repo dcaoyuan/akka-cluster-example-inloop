@@ -49,7 +49,7 @@ object Build extends sbt.Build {
 
 object Dependencies {
   val SPRAY_VERSION = "1.3.1"
-  val AKKA_VERSION = "2.3.3"
+  val AKKA_VERSION = "2.3.5"
 
   val akka_actor = "com.typesafe.akka" %% "akka-actor" % AKKA_VERSION 
   val akka_cluster = "com.typesafe.akka" %% "akka-cluster" % AKKA_VERSION
@@ -62,7 +62,8 @@ object Dependencies {
   
   val akka_slf4j = "com.typesafe.akka" %% "akka-slf4j" % AKKA_VERSION % "runtime"
   val logback_classic = "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime"
+ val akka_persistence_cassandra =  "com.github.krasserm" %% "akka-persistence-cassandra" % "0.3.3"
 
-  val all = Seq(akka_actor, akka_cluster, akka_contrib, spray_io, scalatest, akka_testkit, specs2, akka_slf4j, logback_classic)
+  val all = Seq(akka_actor, akka_cluster, akka_contrib, akka_persistence_cassandra, spray_io, scalatest, akka_testkit, specs2, akka_slf4j, logback_classic)
 
 }

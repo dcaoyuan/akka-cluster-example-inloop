@@ -37,7 +37,7 @@ class Counter1 extends EventsourcedProcessor with ActorLogging {
   def receiveCommand: Receive = {
     case Increment      => updateState(CounterChanged(+1)) //persist(CounterChanged(+1))(updateState)
     case Decrement      => updateState(CounterChanged(-1)) //persist(CounterChanged(-1))(updateState)
-    case Get(_)         => sender() ! (count, self.path.address.hostPort)
+    case Get(_)         => sender() ! (count, "From Counter1: " + self.path.address.port)
     case ReceiveTimeout => context.parent ! Passivate(stopMessage = Stop)
     case Stop           => context.stop(self)
   }
@@ -58,17 +58,28 @@ object Counter1 {
    * Could also be called by counter1Region users,
    * in what ever cases, cluster sharding should be started first.
    */
-  lazy val region = {
+  def startSharding = {
     val system = ClusterMonitor.system
     ClusterSharding(system).start(
       typeName = "Counter1",
       entryProps = Some(Props[Counter1]),
       idExtractor = idExtractor,
       shardResolver = shardResolver)
-    ClusterSharding(system).shardRegion("Counter1")
+  }
+
+  lazy val region2 = {
+    val system = ClusterMonitor.system
+    ClusterSharding(system).start(
+      typeName = "Counter2",
+      entryProps = None,
+      idExtractor = Counter2.idExtractor,
+      shardResolver = Counter2.shardResolver)
+
+    ClusterSharding(system).shardRegion("Counter2")
   }
 
   def main(args: Array[String]) {
-    region
+    startSharding
+    region2
   }
 }

@@ -1,5 +1,6 @@
 package inloop.example.cluster
 
+import akka.contrib.pattern.ClusterSharding
 import akka.pattern.ask
 import akka.actor.Actor
 import akka.actor.ActorLogging
@@ -12,27 +13,47 @@ import scala.util.Success
 class CounterQuery extends Actor with ActorLogging {
 
   implicit val ec = context.dispatcher
-  val counter1Region = Counter1.region
-  val counter2Region = Counter2.region
+  lazy val counter1Region = {
+    ClusterSharding(context.system).start(
+      typeName = "Counter1",
+      entryProps = None,
+      idExtractor = Counter1.idExtractor,
+      shardResolver = Counter1.shardResolver)
+    ClusterSharding(context.system).shardRegion("Counter1")
+  }
+
+  lazy val counter2Region = {
+    ClusterSharding(context.system).start(
+      typeName = "Counter2",
+      entryProps = None,
+      idExtractor = Counter2.idExtractor,
+      shardResolver = Counter2.shardResolver)
+    ClusterSharding(context.system).shardRegion("Counter2")
+  }
+
   val tickTask = context.system.scheduler.schedule(3.seconds, 3.seconds, self, CounterQuery.Tick)
 
   def receive = {
-    case CounterQuery.Tick                => check(counter1Region)
-    case CounterQuery.AskShard(shardName) => check(counter1Region)
+    case CounterQuery.Tick =>
+      check(counter1Region)
+      check(counter2Region)
+    case CounterQuery.AskShard(shardName) =>
+      shardName match {
+        case "Counter1" =>
+          check(counter1Region)
+        case "Counter2" =>
+          check(counter2Region)
+      }
   }
 
   def check(region: ActorRef) {
-    region.ask(Get(100))(2.seconds).onComplete {
-      case Success(x) => log.info("Got: {}" + x)
-      case Failure(x) => log.error(x, "Error: {}", x.getMessage)
+    (0 to 10) foreach { id =>
+      region ! EntryEnvelope(id, Increment)
+      region.ask(Get(id))(2.seconds).onComplete {
+        case Success(x) => log.info("Got: id={}, count={}", id, x)
+        case Failure(x) => log.error(x, "Error: {}", x.getMessage)
+      }
     }
-
-    region ! EntryEnvelope(99, Increment)
-    region.ask(Get(99))(2.seconds).onComplete {
-      case Success(x) => log.info("Got: {}" + x)
-      case Failure(x) => log.error(x, "Error: {}", x.getMessage)
-    }
-
   }
 }
 
@@ -46,5 +67,6 @@ object CounterQuery {
     //val cluster = Cluster(system)
     val query = system.actorOf(Props[CounterQuery])
     query ! CounterQuery.AskShard("Counter1")
+    query ! CounterQuery.AskShard("Counter2")
   }
 }
