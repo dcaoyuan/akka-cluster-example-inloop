@@ -6,13 +6,15 @@ import akka.actor.ReceiveTimeout
 import akka.pattern.ask
 import akka.contrib.pattern.ClusterSharding
 import akka.contrib.pattern.ShardRegion
-import akka.persistence.EventsourcedProcessor
+import akka.persistence.PersistentActor
 import scala.concurrent.duration._
 
-class Counter2 extends EventsourcedProcessor with ActorLogging {
+class Counter2 extends PersistentActor with ActorLogging {
   import ShardRegion.Passivate
 
   //context.setReceiveTimeout(120.seconds)
+
+  override def persistenceId = self.path.toStringWithoutAddress
 
   var count = 10000
 
@@ -48,7 +50,7 @@ object Counter2 {
     case Get(id)              => (id % 10).toString
   }
 
-  def startSharding = {
+  private def startShard = {
     val system = ClusterMonitor.system
     ClusterSharding(system).start(
       typeName = shardName,
@@ -57,7 +59,7 @@ object Counter2 {
       shardResolver = shardResolver)
   }
 
-  lazy val region1 = {
+  private lazy val region1 = {
     val system = ClusterMonitor.system
     ClusterSharding(system).start(
       typeName = Counter1.shardName,
@@ -69,7 +71,7 @@ object Counter2 {
   }
 
   def main(args: Array[String]) {
-    startSharding
+    startShard
     region1
   }
 }

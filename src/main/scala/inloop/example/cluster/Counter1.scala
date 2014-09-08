@@ -6,7 +6,7 @@ import akka.actor.ReceiveTimeout
 import akka.pattern.ask
 import akka.contrib.pattern.ClusterSharding
 import akka.contrib.pattern.ShardRegion
-import akka.persistence.EventsourcedProcessor
+import akka.persistence.PersistentActor
 import scala.concurrent.duration._
 
 case object Increment
@@ -17,12 +17,14 @@ case class EntryEnvelope(id: Long, payload: Any)
 case object Stop
 case class CounterChanged(delta: Int)
 
-class Counter1 extends EventsourcedProcessor with ActorLogging {
+class Counter1 extends PersistentActor with ActorLogging {
   import ShardRegion.Passivate
 
   //context.setReceiveTimeout(120.seconds)
 
   var count = 0
+
+  override def persistenceId = self.path.toStringWithoutAddress
 
   def updateState(event: CounterChanged) {
     log.info("Counter1 got event {}", event)
@@ -45,7 +47,7 @@ class Counter1 extends EventsourcedProcessor with ActorLogging {
 
 object Counter1 {
   val shardName = "Counter1"
-  
+
   val idExtractor: ShardRegion.IdExtractor = {
     case EntryEnvelope(id, payload) => (id.toString, payload)
     case msg @ Get(id)              => (id.toString, msg)
@@ -56,11 +58,7 @@ object Counter1 {
     case Get(id)              => (id % 10).toString
   }
 
-  /**
-   * Could also be called by counter1Region users,
-   * in what ever cases, cluster sharding should be started first.
-   */
-  def startSharding = {
+  private def startShard = {
     val system = ClusterMonitor.system
     ClusterSharding(system).start(
       typeName = shardName,
@@ -69,7 +67,7 @@ object Counter1 {
       shardResolver = shardResolver)
   }
 
-  lazy val region2 = {
+  private lazy val region2 = {
     val system = ClusterMonitor.system
     ClusterSharding(system).start(
       typeName = Counter2.shardName,
@@ -81,7 +79,7 @@ object Counter1 {
   }
 
   def main(args: Array[String]) {
-    startSharding
+    startShard
     region2
   }
 }
