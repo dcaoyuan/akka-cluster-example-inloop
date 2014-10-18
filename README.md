@@ -28,7 +28,8 @@ To got multiple sharding actors run on separated sub-set of nodes, and can be ac
 You have to:
 
 1. All those sharding nodes should contain at lease one same role in "actor.cluster.roles"
-1. Query set a whatever role for "akka.contrib.cluster.sharding.role"
+1. All sharding nodes should have the role in "actor.cluster.roles" which is the same as its sharding role
+1. Query can have or one or none whatever role in "akka.contrib.cluster.sharding.role"
 1. ClusterSharding(system).start() with entryProps = Some(Props[Counter1]) on node1, node2, node3
 1. ClusterSharding(system).start() with entryProps = Some(Props[Counter2]) on node7, node8, node9
 1. ClusterSharding(system).start() with entryProps = None on node of Query for shardings of Counter1 and Counter2.
