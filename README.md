@@ -33,3 +33,6 @@ You have to:
 1. ClusterSharding(system).start() with entryProps = Some(Props[Counter1]) on node1, node2, node3
 1. ClusterSharding(system).start() with entryProps = Some(Props[Counter2]) on node7, node8, node9
 1. ClusterSharding(system).start() with entryProps = None on node of Query for shardings of Counter1 and Counter2.
+
+Note:
+1. cluster singleton proxy or cluster sharding proxy does not need to contain the corresponding role.
