@@ -34,5 +34,14 @@ You have to:
 1. ClusterSharding(system).start() with entryProps = Some(Props[Counter2]) on node7, node8, node9
 1. ClusterSharding(system).start() with entryProps = None on node of Query for shardings of Counter1 and Counter2.
 
+
 Note:
-1. cluster singleton proxy or cluster sharding proxy does not need to contain the corresponding role.
+
+1. cluster singleton proxy or cluster sharding proxy does not need to contain the corresponding role. 
+1. Start sharding or its proxy will try to create sharding coordinate singleton on the oldest node, so the oldest node has to contain those (singleton, sharding) corresponding roles and start these sharding/singleton entry or proxy. 
+1. If the sharding coordinate is not be created/located in cluster yet, the sharding proxy in other node could not identify the coordinate singleton, which means, if you want to a sharding proxy to work properly and which has no corresponding role contained, you have to wait for the coordinate singleton is ready in cluster.
+
+* The sharding's singleton coordinator will be created and located at the oldest node.
+* Anyway, to free the nodes starting order, the first started node (oldest) should start all sharding sevices (or proxy) and singleton manager (or proxy) and thus has to contain all those corresponding roles,
+
+
